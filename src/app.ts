@@ -75,8 +75,8 @@ app.use((err, req, res, next) => {
 setTimeout(() => {
     // AdminProductsCron();
     // productsCron();
-    stock.getImageUrl('');
-    //stock.getDiamonds();
+    // stock.getImageUrl('');
+    // stock.getDiamonds();
 });
 
 export = app;

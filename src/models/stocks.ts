@@ -28,7 +28,9 @@ export interface StockAttributes {
     location?: string;
     treatment?: string;
     discounts?: number;
+    discounts_ori?: number;
     price_per_caret?: number;
+    price_per_caret_ori?: number;
     final_price?: number;
     final_price_ori?: number;
     depth?: number;
@@ -65,12 +67,16 @@ export interface StockAttributes {
     asset_image?: string;
     ideal_scope_image?: string;
     diamond_type?: string;
+    image_data?: string;
     rap_per_caret?: number;
     rap_price?: number;
     lw_ratio?: number;
     brand?: string;
-    status: 'AVAILABLE' | 'HOLD' | 'SOLD' | 'MEMO';
+    status: 'AVAILABLE' | 'HOLD' | 'SOLD' | 'MEMO' | 'RETURNED' | 'ON HOLD' | 'ON MEMO';
     growth_type?: string;
+    sku_prefix: string;
+    sku_number: number;
+    stock_margin: number;
     is_lab_grown?: boolean;
     is_featured?: boolean;
     is_new_arrival?: boolean;
@@ -78,9 +84,11 @@ export interface StockAttributes {
     is_active?: boolean;
     _deleted?: boolean;
     is_wishlist: boolean;
+    is_offer_created: boolean;
+    hearts_and_arrow: boolean;
 }
 
-interface StockCreationAttributes extends Optional<StockAttributes, 'id'> {}
+interface StockCreationAttributes extends Optional<StockAttributes, 'id'> { }
 
 interface StockInstance extends Model<StockAttributes, StockCreationAttributes>, StockAttributes {
     createdAt?: Date;
@@ -88,9 +96,9 @@ interface StockInstance extends Model<StockAttributes, StockCreationAttributes>,
 }
 
 type StockStatic = typeof Model & { associate: (models: any) => void } & (new (
-        values?: Record<string, unknown>,
-        options?: BuildOptions
-    ) => StockInstance);
+    values?: Record<string, unknown>,
+    options?: BuildOptions
+) => StockInstance);
 
 export default (sequelize: Sequelize, DataTypes: any) => {
     const stocks = sequelize.define<StockInstance>(
@@ -128,7 +136,9 @@ export default (sequelize: Sequelize, DataTypes: any) => {
             location: { type: DataTypes.STRING, allowNull: true },
             treatment: { type: DataTypes.STRING, allowNull: true },
             discounts: { type: DataTypes.FLOAT, allowNull: true },
+            discounts_ori: { type: DataTypes.FLOAT, allowNull: true },
             price_per_caret: { type: DataTypes.FLOAT, allowNull: true },
+            price_per_caret_ori: { type: DataTypes.FLOAT, allowNull: true },
             final_price: { type: DataTypes.FLOAT, allowNull: true },
             final_price_ori: { type: DataTypes.FLOAT, allowNull: true },
             depth: { type: DataTypes.FLOAT, allowNull: true },
@@ -172,7 +182,7 @@ export default (sequelize: Sequelize, DataTypes: any) => {
             growth_type: { type: DataTypes.STRING, allowNull: true },
             is_lab_grown: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
             status: {
-                type: DataTypes.ENUM('AVAILABLE', 'HOLD', 'SOLD', 'MEMO'),
+                type: DataTypes.ENUM('AVAILABLE', 'HOLD', 'SOLD', 'MEMO', 'RETURNED', 'ON HOLD', 'ON MEMO'),
                 allowNull: false,
                 defaultValue: 'AVAILABLE'
             },
@@ -181,10 +191,38 @@ export default (sequelize: Sequelize, DataTypes: any) => {
             is_buy_request_created: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
             is_active: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: true },
             _deleted: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
-            is_wishlist: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false }
+            is_wishlist: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
+            is_offer_created: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
+            hearts_and_arrow: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
+            sku_prefix: { type: DataTypes.STRING, allowNull: true, defaultValue: 'DC' },
+            sku_number: { type: DataTypes.INTEGER, autoIncrement: true },
+            stock_margin: { type: DataTypes.DOUBLE, defaultValue: 0 },
+            image_data: { type: DataTypes.TEXT, allowNull: true }
         },
         {
             freezeTableName: true,
+            indexes: [
+                {
+                    name: 'unique_stock_id_and_admin_id',
+                    fields: ['stock_id', 'admin_id'],
+                    unique: true
+                },
+                {
+                    name: 'unique_stock_id_and_vendor_id',
+                    fields: ['stock_id', 'vendor_id'],
+                    unique: true
+                },
+                {
+                    name: 'unique_certificate_number_admin_id',
+                    fields: ['certificate_number', 'admin_id'],
+                    unique: true
+                },
+                {
+                    name: 'unique_certificate_number_vendor_id',
+                    fields: ['certificate_number', 'vendor_id'],
+                    unique: true
+                }
+            ],
             defaultScope: {
                 where: {
                     _deleted: false
