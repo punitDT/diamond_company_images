@@ -7,7 +7,9 @@ import { Op } from 'sequelize';
 
 const groups = {
     // Img1
-    group1: ['pkonline.blob.core.windows.net', 'diamonds360.in', 'videos.gem360.in', 'workshop.360view.link'],
+    group1: ['pkonline.blob.core.windows.net', 'diamonds360.in', 'videos.gem360.in', 'workshop.360view.link', 'v360.in', 'd360.tech', 'view.varnivideo.com',
+        'sltrld.com', 'v360.diamonds', 'diamond.blissvideos.com', 'video.S360.services', 'v3603660.v360.in', 'diamondvid.blob.core.windows.net', 'video.diamonds360.in',
+        'api1.v360.in', '360stonevideo.com', '360diamondvideo.com', 'v360.diamondsvideo.com'],
 
     // imagedata - 2 sec delay
     group2: ['ds-360.jaykar.co.in'],
