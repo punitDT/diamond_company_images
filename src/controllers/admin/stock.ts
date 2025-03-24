@@ -8,15 +8,47 @@ import { videoExtensions } from '../../utils/stock_image_utils';
 
 const groups = {
     // Img1
-    group1: ['pkonline.blob.core.windows.net', 'diamonds360.in', 'videos.gem360.in', 'workshop.360view.link', 'v360.in', 'd360.tech', 'view.varnivideo.com',
-        'sltrld.com', 'v360.diamonds', 'diamond.blissvideos.com', 'video.S360.services', 'v3603660.v360.in', 'diamondvid.blob.core.windows.net', 'video.diamonds360.in',
-        'api1.v360.in', '360stonevideo.com', '360diamondvideo.com', 'v360.diamondsvideo.com', 'video.s360.services', 'view-360.cloud:81', 'dna.diamondvid.com',
-        'v360n.s3.ap-southeast-1.wasabisys.com', 'diamonddetail.s3.ap-south-1.amazonaws.com', 'diamondurl.com', 'diamview360.s3.ap-south-1.amazonaws.com',
-        'vidb2c.s3.eu-north-1.amazonaws.com', 'video.diamondasset.in', 'diamlab.s3.eu-north-1.amazonaws.com', 'lgdus.co', 'clientmedia.s3.amazonaws.com',
-        'v3603650.v360.in', 'v3601487.v360.in', 's3.ap-southeast-1.wasabisys.com', 'diamondvideos360.s3.amazonaws.com', 'visionpts.com'],
+    group1: [
+        'pkonline.blob.core.windows.net',
+        'diamonds360.in',
+        'videos.gem360.in',
+        'workshop.360view.link',
+        'v360.in',
+        'd360.tech',
+        'view.varnivideo.com',
+        'sltrld.com',
+        'v360.diamonds',
+        'diamond.blissvideos.com',
+        'video.S360.services',
+        'v3603660.v360.in',
+        'diamondvid.blob.core.windows.net',
+        'video.diamonds360.in',
+        'api1.v360.in',
+        '360stonevideo.com',
+        '360diamondvideo.com',
+        'v360.diamondsvideo.com',
+        'video.s360.services',
+        'view-360.cloud:81',
+        'dna.diamondvid.com',
+        'v360n.s3.ap-southeast-1.wasabisys.com',
+        'diamonddetail.s3.ap-south-1.amazonaws.com',
+        'diamondurl.com',
+        'diamview360.s3.ap-south-1.amazonaws.com',
+        'vidb2c.s3.eu-north-1.amazonaws.com',
+        'video.diamondasset.in',
+        'diamlab.s3.eu-north-1.amazonaws.com',
+        'lgdus.co',
+        'clientmedia.s3.amazonaws.com',
+        'v3603650.v360.in',
+        'v3601487.v360.in',
+        's3.ap-southeast-1.wasabisys.com',
+        'diamondvideos360.s3.amazonaws.com',
+        'visionpts.com',
+        'view-360.video'
+    ],
 
     // imagedata - 2 sec delay
-    group2: ['ds-360.jaykar.co.in'],
+    group2: [],
 
     // canvas - json format
     group3: ['view.gem360.in'],
@@ -26,6 +58,15 @@ const groups = {
 
     // video source without extension
     group5: ['nivoda-inhousemedia.s3.amazonaws.com'],
+
+    // extract frame form .cwp-canvas canvas f1.jpg
+    group6: ['widget.cutwise.com'],
+
+    // i.jpg
+    group7: ['dilog.cutwise.com'],
+
+    // VIDEO/images/1.jpg
+    group8: ['ds-360.jaykar.co.in']
 };
 
 class Stock {
@@ -36,15 +77,15 @@ class Stock {
             logger.info('Script function start for group1');
             const page = await browser.newPage();
 
-            console.log('Navigating to URL...');
+            logger.info('Navigating to URL...');
             await page.goto(url, {
                 waitUntil: 'networkidle2' // Ensures all network requests are finished
             });
 
-            console.log('Waiting for image to load...');
+            logger.info('Waiting for image to load...');
             await page.waitForSelector('#Img1'); // Waits until an <img> tag appears
 
-            console.log('Extracting image...');
+            logger.info('Extracting image...');
             const base64Data = await page.evaluate(() => {
                 const img = document.querySelector('#Img1') as HTMLImageElement;
                 return img ? img.src : null;
@@ -69,16 +110,16 @@ class Stock {
             logger.info('Script function start for group2');
             const page = await browser.newPage();
 
-            console.log('Navigating to URL...');
+            logger.info('Navigating to URL...');
             await page.goto(url, {
                 waitUntil: 'networkidle2' // Ensures all network requests are finished
             });
 
-            console.log('Waiting for image to load...');
+            logger.info('Waiting for image to load...');
             await page.waitForSelector('#imagedata'); // Waits until an <img> tag appears
             // wait for 2 seconds using promise
             await new Promise((resolve) => setTimeout(resolve, 2000));
-            console.log('Extracting image...');
+            logger.info('Extracting image...');
 
             const base64Data = await page.evaluate(() => {
                 const img = document.querySelector('#imagedata') as HTMLImageElement;
@@ -115,7 +156,9 @@ class Stock {
         try {
             logger.info('Script function start for group4');
             const id = url.split('/').pop();
-            const resonse = await fetch(`https://d3akv4l29hxiqq.cloudfront.net/video360_live/diamonds/${id}/scan_files/1.json`);
+            const resonse = await fetch(
+                `https://d3akv4l29hxiqq.cloudfront.net/video360_live/diamonds/${id}/scan_files/1.json`
+            );
             const data = await resonse.json();
             if (!data?.[0]) {
                 return null;
@@ -129,14 +172,13 @@ class Stock {
     }
 
     /// get video thumbnail from video url
-    async captureVideoThumbnail(videoUrl: string, screenshotTime = 1) {
-        console.log('Starting Puppeteer for first frame capture...');
+    async captureVideoThumbnail(videoUrl: string) {
+        logger.info('Starting Puppeteer for first frame capture...');
 
         const browser = await puppeteer.launch({ headless: false });
         const page = await browser.newPage();
 
         try {
-
             // Navigate to the video URL
             await page.goto(videoUrl);
 
@@ -144,32 +186,187 @@ class Stock {
             await page.waitForSelector('video');
 
             // Select the video element
-            const video = await page.$('video');
+            // const video = await page.$('video');
 
-            // Play the video and wait for the specified time
-            if (video) {
-                await page.evaluate(async (videoElement, time) => {
-                    // wait for 2 seconds using promise
-                    await new Promise((resolve) => setTimeout(resolve, 15000));
-                    videoElement.currentTime = time;
-                    return new Promise<void>((resolve) => {
-                        videoElement.onseeked = () => resolve();
-                    });
-                }, video, screenshotTime);
-            } else {
-                throw new Error('Video element not found');
+            // Ensure the video is available in the DOM
+            const base64Image: any = await page.evaluate(() => {
+                return new Promise((resolve) => {
+                    try {
+                        const video = document.querySelector('video');
+                        if (!video) {
+                            logger.error('No <video> element found on the page!');
+                            return resolve(null);
+                        }
+
+                        video.crossOrigin = 'anonymous'; // Ensure it's cross-origin compatible
+                        video.currentTime = 1; // Seek to 1 second
+
+                        video.addEventListener(
+                            'seeked',
+                            () => {
+                                try {
+                                    const canvas = document.createElement('canvas');
+                                    const ctx = canvas.getContext('2d');
+
+                                    if (!ctx) {
+                                        logger.error('Failed to get canvas context');
+                                        return resolve(null);
+                                    }
+
+                                    canvas.width = video.videoWidth;
+                                    canvas.height = video.videoHeight;
+                                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                                    resolve(canvas.toDataURL('image/jpeg')); // Get Base64 image
+                                } catch (err) {
+                                    logger.error('Error drawing video frame:', err);
+                                    resolve(null);
+                                }
+                            },
+                            { once: true }
+                        );
+
+                        video.addEventListener(
+                            'error',
+                            () => {
+                                logger.error('Error loading video!');
+                                resolve(null);
+                            },
+                            { once: true }
+                        );
+                    } catch (err) {
+                        logger.error('Error processing video:', err);
+                        resolve(null);
+                    }
+                });
+            });
+
+            logger.info(`Thumbnail generated for ${videoUrl}`);
+            return base64Image;
+        } catch (error) {
+            logger.error('Error generating thumbnail:', error);
+            return null;
+        } finally {
+            await browser.close();
+        }
+    }
+
+    async fetchGroup6ImageData(url: string) {
+        const browser = await puppeteer.launch({
+            headless: false,
+            args: ['--disable-web-security', '--disable-features=IsolateOrigins,site-per-process']
+        }); // Use headless: false to debug visually
+        try {
+            logger.info('Script function start for group6');
+            const page = await browser.newPage();
+
+            let imageUrl: any;
+
+            // Listen for all network requests
+            page.on('request', (request) => {
+                if (request.url().includes('.jpg')) {
+                    const urlData = request.url().split('/');
+
+                    urlData.pop();
+
+                    urlData.push('f4.jpg');
+                    imageUrl = urlData.join('/');
+                }
+            });
+
+            logger.info('Navigating to URL...');
+            await page.goto(url, {
+                waitUntil: 'networkidle2' // Ensures all network requests are finished
+            });
+
+            // Wait until the modified URL is set
+            while (!imageUrl) {
+                await new Promise((resolve) => setTimeout(resolve, 500));
             }
 
+            ///
+            return imageUrl;
+        } catch (error: any) {
+            logger.error(error);
+            return null;
+        } finally {
+            await browser.close();
+        }
+    }
 
+    async fetchGroup7ImageData(url: string) {
+        const browser = await puppeteer.launch({
+            headless: false,
+            args: ['--disable-web-security', '--disable-features=IsolateOrigins,site-per-process']
+        }); // Use headless: false to debug visually
+        try {
+            logger.info('Script function start for group6');
+            const page = await browser.newPage();
 
-            // Take a screenshot of the video
-            const screenshot = await video?.screenshot({ encoding: 'base64' });
+            let imageUrl: any;
 
-            console.log(`Thumbnail generated for ${videoUrl}`);
-            return `data:image/jpeg;charset=utf-8;base64,${screenshot}`;
-        } catch (error) {
-            console.error('Error generating thumbnail:', error);
-            throw error;
+            // Listen for all network requests
+            page.on('request', (request) => {
+                logger.info('Request URL:', request.url());
+                if (request.url().includes('i.jpg')) {
+                    imageUrl = request.url();
+                }
+            });
+
+            logger.info('Navigating to URL...');
+            await page.goto(url, {
+                waitUntil: 'networkidle2' // Ensures all network requests are finished
+            });
+
+            // Wait until the modified URL is set
+            while (!imageUrl) {
+                await new Promise((resolve) => setTimeout(resolve, 500));
+            }
+
+            ///
+            return imageUrl;
+        } catch (error: any) {
+            logger.error(error);
+            return null;
+        } finally {
+            await browser.close();
+        }
+    }
+
+    async fetchGroup8ImageData(url: string) {
+        const browser = await puppeteer.launch({
+            headless: false,
+            args: ['--disable-web-security', '--disable-features=IsolateOrigins,site-per-process']
+        }); // Use headless: false to debug visually
+        try {
+            logger.info('Script function start for group6');
+            const page = await browser.newPage();
+
+            let imageUrl: any;
+
+            // Listen for all network requests
+            page.on('request', (request) => {
+                logger.info('Request URL:', request.url());
+                if (request.url().includes('VIDEO/images/1.jpg')) {
+                    imageUrl = request.url();
+                }
+            });
+
+            logger.info('Navigating to URL...');
+            await page.goto(url, {
+                waitUntil: 'networkidle2' // Ensures all network requests are finished
+            });
+
+            // Wait until the modified URL is set
+            while (!imageUrl) {
+                await new Promise((resolve) => setTimeout(resolve, 500));
+            }
+
+            ///
+            return imageUrl;
+        } catch (error: any) {
+            logger.error(error);
+            return null;
         } finally {
             await browser.close();
         }
@@ -178,11 +375,6 @@ class Stock {
     async getImageUrl(url: string) {
         try {
             logger.info('Script function start');
-            // const urlString = url;
-            // const urlString = 'https://ds-360.jaykar.co.in/ds_360.php?chk=QWxs&q=Njc3NTA1OTM2';
-            // const urlString = 'https://diamonds360.in/admin/upload/webdiamonds/MD228-6A/MD228-6A.html';
-            // const urlString = 'https://view.gem360.in/gem360.html?d=0509241206-KVD-44';
-            // check domain group
             let group: string | undefined;
             for (const key in groups) {
                 if (
@@ -194,7 +386,7 @@ class Stock {
                     break;
                 }
             }
-            console.log('Group:', group);
+            logger.info('Group:', group);
             let imageUrl: string | null = null;
             if (group === 'group1') {
                 imageUrl = await this.fetchGroup1ImageData(url);
@@ -216,7 +408,19 @@ class Stock {
                 imageUrl = await this.captureVideoThumbnail(url);
             }
 
-            console.log('Image URL FETCH RESULT:', imageUrl);
+            if (group === 'group6') {
+                imageUrl = await this.fetchGroup6ImageData(url);
+            }
+
+            if (group === 'group7') {
+                imageUrl = await this.fetchGroup7ImageData(url);
+            }
+
+            if (group === 'group8') {
+                imageUrl = await this.fetchGroup8ImageData(url);
+            }
+
+            logger.info('Image URL FETCH RESULT:', imageUrl);
 
             return imageUrl;
         } catch (error: any) {
@@ -227,6 +431,7 @@ class Stock {
 
     /// get list of diamonds with no images
     async getDiamonds() {
+        logger.info('Getting diamonds with no images...');
         try {
             const stocks = await models.stocks.findAll({
                 // where: {
@@ -245,26 +450,26 @@ class Stock {
                             [Op.and]: [
                                 { diamond_video: { [Op.ne]: null } },
                                 { diamond_video: { [Op.ne]: 'null' } },
-                                { diamond_video: { [Op.ne]: '' } },
+                                { diamond_video: { [Op.ne]: '' } }
                             ]
                         },
                         {
-                            [Op.and]: [
+                            [Op.or]: [
                                 { image_data: { [Op.eq]: null } },
                                 { image_data: { [Op.eq]: 'null' } },
                                 { image_data: { [Op.eq]: '' } }
                             ]
-                        },
+                        }
                     ]
                 },
-                attributes: ['id', 'stock_id', 'diamond_video', 'diamond_image'],
+                attributes: ['id', 'stock_id', 'diamond_video', 'diamond_image', 'image_data'],
                 raw: true
             });
 
-            console.log('Stocks length:', stocks.length);
+            logger.info('Stocks length:', stocks.length);
 
             for (const stockItem of stocks) {
-                console.log('Stock Item:', stockItem);
+                logger.info('Stock Item:', stockItem);
 
                 let imageUrl: string | null = null;
 
@@ -274,29 +479,28 @@ class Stock {
                     : false;
 
                 if (isVideoUrl) {
-                    console.log('Video URL skipped:', stockItem.diamond_video);
+                    logger.info('Video URL skipped:', stockItem.diamond_video);
                     imageUrl = await this.captureVideoThumbnail(stockItem?.diamond_video);
                 } else {
                     imageUrl = await this.getImageUrl(stockItem?.diamond_video);
-                    console.log('Image URL:', imageUrl);
+                    logger.info('Image URL:', imageUrl);
                 }
 
-                if (imageUrl === null) {
-                    console.log('Image URL is null');
+                if (!imageUrl) {
+                    logger.info('Image URL is null');
                     continue;
                 }
-
 
                 /// check if imageUrl is base64
                 const isBase64: boolean = imageUrl ? imageUrl.startsWith('data:image') : false;
 
-                console.log('Is Base64:', isBase64);
+                logger.info('Is Base64:', isBase64);
 
                 /// update image into stocks table
                 await models.stocks.update(
                     {
                         image_data: isBase64 ? imageUrl : null,
-                        diamond_image: isBase64 ? null : imageUrl,
+                        diamond_image: isBase64 ? null : imageUrl
                     },
                     {
                         where: {
@@ -304,7 +508,6 @@ class Stock {
                         }
                     }
                 );
-
             }
 
             // Get list of diamonds with no images

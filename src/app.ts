@@ -76,7 +76,7 @@ setTimeout(() => {
     // AdminProductsCron();
     // productsCron();
     // stock.getImageUrl('');
-    // stock.getDiamonds();
+    stock.getDiamonds();
 });
 
 export = app;
